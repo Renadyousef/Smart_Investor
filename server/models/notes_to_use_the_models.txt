@@ -1,0 +1,38 @@
+The Model looks at the Previous 60 trading days
+Then predicts Next trading day's closing price
+
+*******Using the model will be like this************
+X = last 60 days WE FETCH IT LIVE FROM SAUDI MARKET
+y = day 61 THE MODEL PREDICTS IT
+
+--- DEV Notes
+The training data was scaled using:
+
+scaler = MinMaxScaler(feature_range=(0, 1))
+
+So after prediction you should convert it back:
+
+pred_scaled = predict_next_day(last_60_days_scaled)
+
+pred_price = scaler.inverse_transform(
+    [[pred_scaled]]
+)[0][0]
+---
+buy/sell logic
+Choose stock
+      ↓
+Load corresponding model
+      ↓
+Fetch latest prices
+      ↓
+Take last 60 days
+      ↓
+Predict next day's closing price
+      ↓
+Convert back to SAR
+      ↓
+Compare with today's price
+      ↓
+BUY / HOLD / SELL
+
+---
