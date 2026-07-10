@@ -6,7 +6,6 @@ import torch.nn as nn
 
 # LSTM Architecture to work with it while loading the models
 
-
 class StockLSTM(nn.Module):
     def __init__(self, input_size=1, hidden_layer_size=50, output_size=1):
         super().__init__()
@@ -74,7 +73,8 @@ def get_last_sixty_days_data(stock_name):
 
 # Generate Recommendation (Initial not yet final algo)
 
-def generate_recommendation(growth_pct):
+def generate_recommendation(growth_pct): # Add check if user owned stock then sell,keep, or risk alert
+    #if not we do Buy Avoid maybe more 
 
     if growth_pct >= 5:
         return "Strong Buy"
