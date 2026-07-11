@@ -1,3 +1,4 @@
+#app
 from fastapi import FastAPI
 from routes.stock_routes import router as stock_router
 #from routes.stock_routes import router as stock_router This is how er import our routes

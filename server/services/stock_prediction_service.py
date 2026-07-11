@@ -1,8 +1,15 @@
 import yfinance as yf
 import torch
 import torch.nn as nn
+import joblib
 
+#User owned stock check
+def user_owns_stock(user_id, stock_name): #BTW NAME IS ALWAYS TICKER CODE
 
+    # TODO:
+    # Query portfolio table
+
+    return False
 
 # LSTM Architecture to work with it while loading the models
 
@@ -29,12 +36,26 @@ class StockLSTM(nn.Module):
 
 # Models Mapping ***Ticker as input*** and model path output to use
 
-
 MODELS = {
     "2010.SR": "models/lstm_Sabic_model.pth",
     "2222.SR": "models/lstm_Aramco_model.pth",
     "7010.SR": "models/lstm_STC_model.pth"
 }
+
+SCALERS = {
+    "2010.SR": "models/sabic_scaler.pkl",
+    "2222.SR": "models/scaler_Aramco_model.pkl",
+    "7010.SR": "models/scaler_AlRajhi_stock_model.pkl"
+}
+
+#From the models to work on the algoritm
+MAE={
+    "2010.SR":7.2642,
+    "2222.SR":2.9739,
+    "7010.SR":5.8926
+
+}
+
 
 
 
@@ -55,7 +76,14 @@ def load_stock_model(stock_name):
 
     return model
 
+ #Loading scaler by model name
+def load_stock_scaler(stock_name):
 
+    scaler_path = SCALERS[stock_name]
+
+    scaler = joblib.load(scaler_path)
+
+    return scaler
 
 # Fetch Last 60 Trading Days Helper func
 
@@ -72,28 +100,42 @@ def get_last_sixty_days_data(stock_name):
 
 
 # Generate Recommendation (Initial not yet final algo)
+# Add check if user owned stock then sell,keep, or risk alert
+ #if not we do Buy Avoid maybe more 
+ 
+def generate_recommendation(
+    growth_pct,
+    mae_percent,
+    owns_stock
+):
 
-def generate_recommendation(growth_pct): # Add check if user owned stock then sell,keep, or risk alert
-    #if not we do Buy Avoid maybe more 
+    if owns_stock:
 
-    if growth_pct >= 5:
-        return "Strong Buy"
+        if growth_pct > mae_percent:
+            return "KEEP"
 
-    elif growth_pct >= 2:
-        return "Buy"
+        elif growth_pct < (-2 * mae_percent):
+            return "HIGH RISK"
 
-    elif growth_pct > -2:
-        return "Hold"
+        elif growth_pct < (-mae_percent):
+            return "SELL"
 
-    elif growth_pct > -5:
-        return "Risky"
+        else:
+            return "HOLD"
 
     else:
-        return "Sell"
+
+        if growth_pct > mae_percent:
+            return "BUY"
+
+        else:
+            return "AVOID"
+
+
 
 
 #Getting the next day predicition
-def get_stock_prediction(stock_name):
+def get_stock_prediction(stock_name,user_id):
 
     # 1. Fetch latest 60 days
     prices = get_last_sixty_days_data(stock_name)
@@ -104,18 +146,35 @@ def get_stock_prediction(stock_name):
     # 3. Load correct model
     model = load_stock_model(stock_name)
 
-    # 4. Prepare input tensor
+
+    # 4. Load scaler used during training
+    scaler = load_stock_scaler(stock_name)
+
+    # 5. Scale latest 60 prices
+    scaled_prices = scaler.transform(
+    prices.values.reshape(-1, 1)
+)
+
+
+    # 6. Prepare input tensor
     input_tensor = (
-        torch.tensor(prices.values)
+        torch.tensor(scaled_prices)
         .float()
         .reshape(1, 60, 1)
     )
 
-    # 5. Predict next day
+    # 7. Predict next day
     with torch.no_grad():
         prediction = model(input_tensor)
 
-    predicted_price = float(prediction.item())
+    predicted_scaled = float(prediction.item())
+
+
+    #8.transform the pred back to normal price
+
+    predicted_price = scaler.inverse_transform(
+        [[predicted_scaled]]
+        )[0][0]
 
     # 6. Growth rate  %
     growth_pct = (
@@ -123,17 +182,31 @@ def get_stock_prediction(stock_name):
         / current_price
     ) * 100
 
-    # 7. Recommendation call the recom algorithm
-    recommendation = generate_recommendation(
-        growth_pct
-    )
+#MAE precentage by models
+    model_mae = MAE[stock_name]
+    mae_percent = (
+         model_mae
+         / current_price
+         ) * 100
+    
+#Does the user Own the stock
+    owns_stock = user_owns_stock(
+    user_id,
+    stock_name
+)
 
-    # 8. Return result
+
+
+    # 7. Recommendation call the recom algorithm
+    recommendation = generate_recommendation(growth_pct,mae_percent,owns_stock)
+
+    # 8. Return result btw name is the ticker code 
     return {
         "stock": stock_name,
         "current_price": round(current_price, 2),
         "predicted_price": round(predicted_price, 2),
-        "growth_pct": round(growth_pct, 2),
+        "growth_pct": round(growth_pct, 2), # How is this exactly retruned can it be -?
+        "mae_percent": round(mae_percent, 2), #Model error precantage
         "recommendation": recommendation
     }
 

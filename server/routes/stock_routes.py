@@ -1,3 +1,4 @@
+#Stock pred api route
 from fastapi import APIRouter
 from controllers.stock_controller import predict_stock
 
