@@ -2,6 +2,8 @@ import yfinance as yf
 import torch
 import torch.nn as nn
 import joblib
+from database.session import SessionLocal
+from sqlalchemy import text
 
 #User owned stock check
 def user_owns_stock(user_id, stock_name): #BTW NAME IS ALWAYS TICKER CODE
@@ -37,7 +39,7 @@ class StockLSTM(nn.Module):
 # Models Mapping ***Ticker as input*** and model path output to use
 
 MODELS = {
-    "2010.SR": "models/lstm_Sabic_model.pth",
+    "2010.SR": "models/lstm_Sabic_model .pth",
     "2222.SR": "models/lstm_Aramco_stock_model.pth",
     "1120.SR": "models/lstm_AlRajhi_stock_model.pth"
 }
@@ -103,6 +105,10 @@ def get_last_sixty_days_data(stock_name):
 # Add check if user owned stock then sell,keep, or risk alert
  #if not we do Buy Avoid maybe more 
  
+# Generate Recommendation (Initial not yet final algo)
+# Add check if user owned stock then sell,keep, or risk alert
+#if not we do Buy Avoid maybe more
+
 def generate_recommendation(
     growth_pct,
     mae_percent,
@@ -112,24 +118,54 @@ def generate_recommendation(
     if owns_stock:
 
         if growth_pct > mae_percent:
-            return "KEEP"
+            return (
+                "احتفاظ",
+                "تشير التوقعات إلى إمكانية ارتفاع السهم خلال الفترة القادمة."
+            )
 
         elif growth_pct < (-2 * mae_percent):
-            return "HIGH RISK"
+            return (
+                "مخاطرة عالية",
+                "تشير التوقعات إلى احتمال انخفاض ملحوظ في سعر السهم."
+            )
 
         elif growth_pct < (-mae_percent):
-            return "SELL"
+            return (
+                "بيع",
+                "تشير التوقعات إلى انخفاض محتمل في سعر السهم."
+            )
 
         else:
-            return "HOLD"
+            return (
+                "احتفاظ",
+                "لا توجد مؤشرات قوية على ارتفاع أو انخفاض كبير في السعر."
+            )
 
     else:
 
         if growth_pct > mae_percent:
-            return "BUY"
+            return (
+                "شراء",
+                "تشير التوقعات إلى فرصة جيدة لنمو السهم."
+            )
+
+        elif growth_pct > 0:
+            return (
+                "مراقبة",
+                "هناك مؤشرات إيجابية، لكن يفضل متابعة السهم قبل اتخاذ قرار الشراء."
+            )
+
+        elif growth_pct > -mae_percent:
+            return (
+                "محايد",
+                "لا توجد حالياً مؤشرات واضحة تدعم الشراء أو تجنب السهم."
+            )
 
         else:
-            return "AVOID"
+            return (
+                "تجنب",
+                "تشير التوقعات إلى احتمال انخفاض السهم خلال الفترة القادمة."
+            )
 
 
 
@@ -141,7 +177,7 @@ def get_stock_prediction(stock_name,user_id):
     prices = get_last_sixty_days_data(stock_name)
 
     # 2. Current stock price
-    current_price = float(prices.iloc[-1])
+    current_price = prices.iloc[-1].item()
 
     # 3. Load correct model
     model = load_stock_model(stock_name)
@@ -198,25 +234,80 @@ def get_stock_prediction(stock_name,user_id):
 
 
     # 7. Recommendation call the recom algorithm
-    recommendation = generate_recommendation(growth_pct,mae_percent,owns_stock)
+# 7. Recommendation call the recom algorithm
+    recommendation, reason = generate_recommendation(growth_pct,mae_percent,owns_stock)
 
-    # 8. Return result btw name is the ticker code 
+# Save recommendation to DB do try and catch
+    save_recommendation(user_id,stock_name,recommendation,growth_pct,reason)
+
+
+    # 8. Return result btw name is the ticker code
     return {
-        "stock": stock_name,
-        "current_price": round(current_price, 2),
-        "predicted_price": round(predicted_price, 2),
-        "growth_pct": round(growth_pct, 2), # How is this exactly retruned can it be -? yes
-        "mae_percent": round(mae_percent, 2), #Model error precantage
-        "recommendation": recommendation
-    }
+    "stock": stock_name,
+    "current_price": round(current_price, 2),
+    "predicted_price": round(predicted_price, 2),
+    "growth_pct": round(growth_pct, 2),
+    "mae_percent": round(mae_percent, 2),
+    "recommendation": recommendation,
+    "reason": reason}
+    
 
 
 
-# Local Test on aramco stock-- i need same sclaer in training to use it here + transform stocks back to real numbers at return
 
 
-if __name__ == "__main__":
 
-    result = get_stock_prediction("2222.SR",1)
+def save_recommendation(
+    investor_id,
+    stock_name,
+    recommendation,
+    growth_pct,
+    reason
+):
+    db = SessionLocal()
 
-    print(result)
+    try:
+
+        db.execute(
+            text(
+                """
+                INSERT INTO recommendations
+                (
+                    investor_id,
+                    ticker,
+                    recommendation_type,
+                    predicted_growth,
+                    reason
+                )
+                VALUES
+                (
+                    :investor_id,
+                    :ticker,
+                    :recommendation_type,
+                    :predicted_growth,
+                    :reason
+                )
+                """
+            ),
+            {
+                "investor_id": investor_id,
+                "ticker": stock_name,
+                "recommendation_type": recommendation,
+                "predicted_growth": round(growth_pct, 2),
+                "reason": reason
+            }
+        )
+
+        db.commit()
+
+    finally:
+        db.close()
+
+# Local Test on aramco stock-- 
+
+
+# if __name__ == "__main__":
+
+#     result = get_stock_prediction("2222.SR",None)
+
+#     print(result)
