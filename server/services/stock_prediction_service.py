@@ -205,7 +205,7 @@ def get_stock_prediction(stock_name,user_id):
         "stock": stock_name,
         "current_price": round(current_price, 2),
         "predicted_price": round(predicted_price, 2),
-        "growth_pct": round(growth_pct, 2), # How is this exactly retruned can it be -?
+        "growth_pct": round(growth_pct, 2), # How is this exactly retruned can it be -? yes
         "mae_percent": round(mae_percent, 2), #Model error precantage
         "recommendation": recommendation
     }
