@@ -38,21 +38,21 @@ class StockLSTM(nn.Module):
 
 MODELS = {
     "2010.SR": "models/lstm_Sabic_model.pth",
-    "2222.SR": "models/lstm_Aramco_model.pth",
-    "7010.SR": "models/lstm_STC_model.pth"
+    "2222.SR": "models/lstm_Aramco_stock_model.pth",
+    "1120.SR": "models/lstm_AlRajhi_stock_model.pth"
 }
 
 SCALERS = {
     "2010.SR": "models/sabic_scaler.pkl",
     "2222.SR": "models/scaler_Aramco_model.pkl",
-    "7010.SR": "models/scaler_AlRajhi_stock_model.pkl"
+    "1120.SR": "models/scaler_AlRajhi_stock_model.pkl"
 }
 
 #From the models to work on the algoritm
 MAE={
     "2010.SR":7.2642,
     "2222.SR":2.9739,
-    "7010.SR":5.8926
+    "1120.SR":5.8926
 
 }
 
@@ -217,6 +217,6 @@ def get_stock_prediction(stock_name,user_id):
 
 if __name__ == "__main__":
 
-    result = get_stock_prediction("2222.SR")
+    result = get_stock_prediction("2222.SR",1)
 
     print(result)
