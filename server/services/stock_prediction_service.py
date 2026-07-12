@@ -250,7 +250,7 @@ def get_stock_prediction(stock_name,user_id):
     "mae_percent": round(mae_percent, 2),
     "recommendation": recommendation,
     "reason": reason}
-    
+
 
 
 
@@ -303,7 +303,7 @@ def save_recommendation(
     finally:
         db.close()
 
-# Local Test on aramco stock-- 
+# Local Test on aramco stock--
 
 
 # if __name__ == "__main__":
