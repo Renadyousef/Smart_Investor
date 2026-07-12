@@ -63,3 +63,16 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             "full_name": user.full_name
         }
     }
+
+from middleware.auth import get_current_user
+
+@router.get("/me")
+def get_me(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == current_user["id"]).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="المستخدم غير موجود")
+    return {
+        "id": user.id,
+        "account_number": user.account_number,
+        "full_name": user.full_name
+    }

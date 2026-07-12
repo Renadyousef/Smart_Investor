@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { TrendingUp, TrendingDown, Search, MessageCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Search, MessageCircle, LogOut } from 'lucide-react';
 import StockChart from '../components/StockChart';
 
 const MOCK_STOCKS = [
@@ -10,17 +10,26 @@ const MOCK_STOCKS = [
 ];
 
 const Home = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   return (
     <div className="py-6 space-y-8">
       <header className="flex justify-between items-start">
-        <button className="p-3 bg-surface rounded-2xl border border-gray-800 hover:bg-gray-800 transition-colors">
-          <Search size={22} className="text-gray-400" />
-        </button>
+        <div className="flex items-center space-x-3 space-x-reverse">
+          <button
+            onClick={signOut}
+            className="p-3 bg-danger/10 text-danger rounded-2xl border border-danger/20 hover:bg-danger/20 transition-colors"
+            title="تسجيل الخروج"
+          >
+            <LogOut size={22} />
+          </button>
+          <button className="p-3 bg-surface rounded-2xl border border-gray-800 hover:bg-gray-800 transition-colors">
+            <Search size={22} className="text-gray-400" />
+          </button>
+        </div>
         <div className="text-right">
-          <h1 className="text-2xl font-bold">مرحباً {user?.user_metadata?.full_name || 'أحمد'}</h1>
-          <p className="text-gray-500 text-sm">مساعدك الذكي في سوق الأسهم</p>
+          <h1 className="text-2xl font-bold tracking-tight">مرحباً {user?.full_name || 'أحمد'}</h1>
+          <p className="text-gray-500 text-sm font-medium">رقم الحساب: {user?.account_number}</p>
         </div>
       </header>
 
