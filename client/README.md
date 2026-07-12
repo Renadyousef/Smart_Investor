@@ -1,16 +1,64 @@
-# React + Vite
+# Smart Investor - React Client 📈
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend for the Smart Investor app, a modern fintech dashboard designed for the Saudi Stock Market (Tadawul). Built with **React 19**, **Vite**, and **Tailwind CSS**, featuring full Arabic RTL support and real-time AI insights.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+*   **Arabic RTL UI**: Professional Middle Eastern user experience with Cairo typography and right-to-left layout.
+*   **AI Stock Insights**: Interactive charts powered by **Recharts**, visualizing LSTM predictions and risk analysis.
+*   **Unified Auth**: Secure authentication via **Account Number** (رقم الحساب) communicating directly with the Python backend.
+*   **Full Functional Suite**:
+    *   **Dashboard**: Market overview with live-style charts.
+    *   **Portfolio**: Detailed investment tracking with growth/decline indicators.
+    *   **Notifications**: AI-driven risk alerts and recommendation history.
+    *   **Smart Assistant**: Interactive chatbot interface for market queries.
+    *   **Comparison**: Side-by-side growth vs. risk analysis for top stocks.
+*   **Mobile-First Design**: Sleek "Dark Fintech" aesthetic optimized for all devices.
 
-## React Compiler
+## 🛠 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+*   **Framework**: [React 19](https://react.dev/) + [Vite](https://vite.dev/)
+*   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+*   **Charts**: [Recharts](https://recharts.org/)
+*   **Icons**: [Lucide React](https://lucide.dev/)
+*   **Navigation**: [React Router 7](https://reactrouter.com/)
+*   **API Communication**: [Axios](https://axios-http.com/) (with JWT interceptors)
 
-## Expanding the ESLint configuration
+## 📁 Directory Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```text
+src/
+├── components/     # Reusable UI components (Charts, Layout, StockCards)
+├── context/        # Global state management (AuthContext)
+├── pages/          # Feature screens (Home, Portfolio, Chatbot, Notifications, Compare, Auth)
+├── services/       # API configuration and JWT handling
+├── index.css       # Tailwind & Global RTL styles
+└── main.jsx        # App entry point
+```
+
+## ⚙️ Getting Started
+
+### 1. Install Dependencies
+```bash
+npm install
+```
+
+### 2. Configure Environment
+Create a `.env` file or update `src/services/api.js`:
+```env
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+### 3. Run Development Server
+```bash
+npm run dev
+```
+
+## 🔒 Security
+
+This client is integrated with a secure **JWT-based** Python backend. 
+- Authentication tokens are stored securely in `localStorage`.
+- All requests to the FastAPI server automatically include the JWT in the `Authorization` header.
+
+---
+Part of the **Smart Investor** unified full-stack ecosystem.
