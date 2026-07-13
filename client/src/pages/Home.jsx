@@ -1,4 +1,3 @@
-import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { TrendingUp, TrendingDown, Search, MessageCircle, LogOut } from 'lucide-react';
 import StockChart from '../components/StockChart';

@@ -1,6 +1,5 @@
-import React from 'react';
 import { BarChart2, TrendingUp, TrendingDown, ArrowLeftRight } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const DATA = [
   { name: 'أرامكو', growth: 8.5, risk: 2.1 },

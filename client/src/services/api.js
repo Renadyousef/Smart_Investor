@@ -17,7 +17,11 @@ api.interceptors.request.use((config) => {
 
 export const stockService = {
   getPrediction: (symbol) => api.get(`/stocks/predict/${symbol}`),
-  // Add more stock related endpoints here
+};
+
+export const portfolioService = {
+  getHoldings: () => api.get('/portfolio/holdings'),
+  addHolding: (data) => api.post('/portfolio/holdings', data),
 };
 
 export default api;

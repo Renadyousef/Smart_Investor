@@ -1,5 +1,4 @@
-import React from 'react';
-import { LineChart, Line, ResponsiveContainer, YAxis, XAxis, Tooltip, AreaChart, Area } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 const StockChart = ({ data, color }) => {
   return (

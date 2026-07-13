@@ -1,4 +1,3 @@
-import React from 'react';
 import { Bell, AlertCircle, Info, Lightbulb } from 'lucide-react';
 
 const MOCK_NOTIFICATIONS = [

@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from routes.stock_routes import router as stock_router
 from routes.auth_routes import router as auth_router
+from routes.portfolio_routes import router as portfolio_router
 from fastapi.middleware.cors import CORSMiddleware
 from database.session import engine
 from database.models import Base
@@ -23,6 +24,12 @@ app.include_router(
     auth_router,
     prefix="/auth",
     tags=["Authentication"]
+)
+
+app.include_router(
+    portfolio_router,
+    prefix="/portfolio",
+    tags=["Portfolio"]
 )
 
 app.include_router(
