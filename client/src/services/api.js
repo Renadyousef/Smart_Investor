@@ -17,6 +17,7 @@ api.interceptors.request.use((config) => {
 
 export const stockService = {
   getPrediction: (symbol) => api.get(`/stocks/predict/${symbol}`),
+  getHistory: (symbol) => api.get(`/stocks/history/${symbol}`),
 };
 
 export const portfolioService = {

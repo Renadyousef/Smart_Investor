@@ -1,18 +1,71 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { TrendingUp, TrendingDown, Search, MessageCircle, LogOut } from 'lucide-react';
+import { TrendingUp, TrendingDown, Search, MessageCircle, LogOut, Loader2 } from 'lucide-react';
 import StockChart from '../components/StockChart';
-
-const MOCK_STOCKS = [
-  { id: '1', symbol: '2222.SR', name: 'أرامكو السعودية', price: 29.50, change: 1.25, history: [28, 28.5, 29, 28.8, 29.2, 29.5] },
-  { id: '2', symbol: '2010.SR', name: 'سابك', price: 78.20, change: -0.45, history: [80, 79.5, 79, 78.5, 78, 78.2] },
-  { id: '3', symbol: '1120.SR', name: 'الراجحي', price: 85.10, change: 2.10, history: [82, 83, 84.5, 84, 85, 85.1] },
-];
+import { stockService } from '../services/api';
 
 const Home = () => {
   const { user, signOut } = useAuth();
+  const [marketData, setMarketData] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const tickers = ['2222.SR', '2010.SR', '1120.SR'];
+
+  const getStockName = (ticker) => {
+    const names = {
+      '2222.SR': 'أرامكو السعودية',
+      '2010.SR': 'سابك',
+      '1120.SR': 'الراجحي'
+    };
+    return names[ticker] || ticker;
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        // 1. Fetch real market history for the top cards (Market Overview)
+        const historyResults = await Promise.all(
+          tickers.map(async (ticker) => {
+            try {
+              const res = await stockService.getHistory(ticker);
+              return { ...res.data, name: getStockName(ticker) };
+            } catch (err) {
+              console.error(`History error for ${ticker}:`, err);
+              return null;
+            }
+          })
+        );
+        setMarketData(historyResults.filter(r => r !== null));
+
+        // 2. Fetch AI predictions for the bottom list (AI Recommendation Section)
+        const predictionResults = await Promise.all(
+          tickers.map(async (ticker) => {
+            try {
+              const res = await stockService.getPrediction(ticker);
+              return { ...res.data, name: getStockName(ticker) };
+            } catch (err) {
+              console.error(`Prediction error for ${ticker}:`, err);
+              return null;
+            }
+          })
+        );
+        setRecommendations(predictionResults.filter(r => r !== null));
+
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
-    <div className="py-6 space-y-8">
+    <div className="py-6 space-y-8 px-4">
       <header className="flex justify-between items-start">
         <div className="flex items-center space-x-3 space-x-reverse">
           <button
@@ -45,58 +98,69 @@ const Home = () => {
       </div>
 
       <section className="space-y-6">
-        <h3 className="text-xl font-bold px-1">نظرة السوق</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {MOCK_STOCKS.map((stock) => (
-            <div key={stock.id} className="bg-surface p-6 rounded-[2rem] space-y-4 border border-gray-800 hover:border-primary/50 transition-all group">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  {stock.change > 0 ? (
-                    <TrendingUp size={18} className="text-success" />
-                  ) : (
-                    <TrendingDown size={18} className="text-danger" />
-                  )}
-                  <span className="font-bold text-gray-300">{stock.name}</span>
+        <h3 className="text-xl font-bold px-1">نظرة السوق (بيانات حية)</h3>
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 space-y-4">
+             <Loader2 className="w-10 h-10 animate-spin text-primary" />
+             <p className="text-gray-500 text-sm">جاري جلب بيانات السوق...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {marketData.map((stock) => (
+              <div key={stock.stock} className="bg-surface p-6 rounded-[2rem] space-y-4 border border-gray-800 hover:border-primary/50 transition-all group">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <span className="font-bold text-gray-300">{stock.name}</span>
+                  </div>
+                  <TrendingUp size={18} className="text-success" />
+                </div>
+                <div className="flex justify-between items-end">
+                  <div>
+                    <p className="font-black text-2xl tracking-tighter">SAR {stock.current_price}</p>
+                    <p className="text-[10px] text-gray-500">مباشر من تداول</p>
+                  </div>
+                  <div className="w-24 h-12">
+                    <StockChart
+                      data={stock.history}
+                      color="#4CAF50"
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="font-black text-2xl tracking-tighter">SAR {stock.price}</p>
-                  <p className={`text-sm font-bold ${stock.change > 0 ? 'text-success' : 'text-danger'}`}>
-                    {stock.change > 0 ? '+' : ''}{stock.change}%
-                  </p>
-                </div>
-                <div className="w-24 h-12">
-                   <StockChart
-                    data={stock.history}
-                    color={stock.change > 0 ? '#4CAF50' : '#F44336'}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="space-y-6">
         <h3 className="text-xl font-bold px-1">توصيات الذكاء الاصطناعي</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {MOCK_STOCKS.map((stock, index) => (
-            <div key={stock.id} className="bg-surface/50 hover:bg-surface p-5 rounded-[1.5rem] flex justify-between items-center border border-gray-800 transition-colors group">
+          {recommendations.map((stock, index) => (
+            <div key={stock.stock} className="bg-surface/50 hover:bg-surface p-5 rounded-[1.5rem] flex justify-between items-center border border-gray-800 transition-colors group">
               <div className="text-left">
-                <p className="font-black text-xl tracking-tighter">SAR {stock.price}</p>
-                <p className={`text-xs font-bold ${stock.change > 0 ? 'text-success' : 'text-danger'}`}>
-                  {stock.change > 0 ? '+' : ''}{stock.change}%
-                </p>
+                <p className="font-black text-xl tracking-tighter">SAR {stock.current_price}</p>
+                <div className="flex flex-col">
+                    <p className={`text-xs font-bold ${stock.growth_pct > 0 ? 'text-success' : 'text-danger'}`}>
+                    {stock.growth_pct > 0 ? '+' : ''}{stock.growth_pct}% متوقع
+                    </p>
+                    <div className={`mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full inline-block w-max ${
+                        stock.recommendation === 'BUY' ? 'bg-success/20 text-success' :
+                        stock.recommendation === 'KEEP' ? 'bg-primary/20 text-primary' :
+                        'bg-danger/20 text-danger'
+                    }`}>
+                        {stock.recommendation}
+                    </div>
+                </div>
               </div>
 
               <div className="flex items-center space-x-4 space-x-reverse">
                 <div className="text-right">
                   <p className="font-bold group-hover:text-primary transition-colors">{stock.name}</p>
-                  <p className="text-[10px] text-gray-600 font-mono tracking-widest">{stock.symbol}</p>
+                  <p className="text-[10px] text-gray-600 font-mono tracking-widest">{stock.stock}</p>
                 </div>
                 <div className="w-12 h-12 rounded-2xl bg-background border border-gray-800 flex items-center justify-center font-black text-primary text-xl shadow-inner">
-                  {3 - index}
+                  {index + 1}
                 </div>
               </div>
             </div>

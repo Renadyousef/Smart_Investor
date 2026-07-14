@@ -90,7 +90,7 @@ def load_stock_model(stock_name):
         torch.load(model_path, map_location="cpu")
     )
 
-    model.eval() # for evaluting 
+    model.eval() # for evaluting
 
     return model
 
@@ -119,8 +119,8 @@ def get_last_sixty_days_data(stock_name):
 
 # Generate Recommendation (Initial not yet final algo)
 # Add check if user owned stock then sell,keep, or risk alert
- #if not we do Buy Avoid maybe more 
- 
+ #if not we do Buy Avoid maybe more
+
 # Generate Recommendation (Initial not yet final algo)
 # Add check if user owned stock then sell,keep, or risk alert
 #if not we do Buy Avoid maybe more
@@ -240,7 +240,7 @@ def get_stock_prediction(stock_name,user_id):
          model_mae
          / current_price
          ) * 100
-    
+
 #Does the user Own the stock
     owns_stock = user_owns_stock(
     user_id,
