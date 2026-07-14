@@ -6,12 +6,28 @@ from database.session import SessionLocal
 from sqlalchemy import text
 
 #User owned stock check
-def user_owns_stock(user_id, stock_name): #BTW NAME IS ALWAYS TICKER CODE
+def user_owns_stock(user_id, stock_name):
+    db = SessionLocal()
 
-    # TODO:
-    # Query portfolio table
+    try:
+        result = db.execute(
+            text("""
+                SELECT 1
+                FROM portfolio_holdings
+                WHERE investor_id = :user_id
+                AND ticker = :ticker
+                LIMIT 1
+            """),
+            {
+                "user_id": user_id,
+                "ticker": stock_name
+            }
+        ).first()
 
-    return False
+        return result is not None
+
+    finally:
+        db.close()
 
 # LSTM Architecture to work with it while loading the models
 
@@ -303,11 +319,11 @@ def save_recommendation(
     finally:
         db.close()
 
-# Local Test on aramco stock--
+#Local Test on aramco stock--
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
-#     result = get_stock_prediction("2222.SR",None)
+    result = get_stock_prediction("2222.SR",None)
 
-#     print(result)
+    print(result)
