@@ -322,8 +322,8 @@ def save_recommendation(
 #Local Test on aramco stock--
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    result = get_stock_prediction("2222.SR",None)
+#     result = get_stock_prediction("2222.SR",None)
 
-    print(result)
+#     print(result)
