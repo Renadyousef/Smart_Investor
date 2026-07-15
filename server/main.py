@@ -6,7 +6,7 @@ from routes.portfolio_routes import router as portfolio_router
 from fastapi.middleware.cors import CORSMiddleware
 from database.session import engine
 from database.models import Base
-from routes.financial_routes import router as financial_router
+from routes.chat_bot_routes import router as financial_router
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
