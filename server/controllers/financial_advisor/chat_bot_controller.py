@@ -331,6 +331,19 @@ def ask_financial_advisor(user_query):
     return answer
 
 
+#calling the controller
+def chat_with_financial_advisor(user_query):
+
+    answer = ask_financial_advisor(
+        user_query
+    )
+
+    return {
+        "question": user_query,
+        "answer": answer
+    }
+
+
 # tesring calls
 
 # if __name__ == "__main__":
