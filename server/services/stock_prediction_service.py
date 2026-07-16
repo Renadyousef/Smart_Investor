@@ -65,11 +65,11 @@ SCALERS = {
     "2222.SR": os.path.join(BASE_DIR, "models", "scaler_Aramco_model.pkl"),
     "1120.SR": os.path.join(BASE_DIR, "models", "scaler_AlRajhi_stock_model.pkl")
 }
-
+# Precentage
 MAE = {
-    "2010.SR": 7.2642,
-    "2222.SR": 2.9739,
-    "1120.SR": 5.8926
+    "2010.SR": 16.32,
+    "2222.SR": 20.12,
+    "1120.SR": 16.32
 }
 
 def load_stock_model(stock_name):
@@ -103,7 +103,10 @@ def get_last_sixty_days_data(stock_name):
 
     return []
 
+
+
 def generate_recommendation(growth_pct, mae_percent, owns_stock):
+
     if owns_stock:
         if growth_pct > mae_percent:
             return ("احتفاظ", "تشير التوقعات إلى إمكانية ارتفاع السهم خلال الفترة القادمة.")
@@ -119,7 +122,7 @@ def generate_recommendation(growth_pct, mae_percent, owns_stock):
         elif growth_pct > 0:
             return ("مراقبة", "هناك مؤشرات إيجابية، لكن يفضل متابعة السهم قبل اتخاذ قرار الشراء.")
         elif growth_pct > -mae_percent:
-            return ("محايد", "لا توجد حالياً مؤشرات واضحة تدعم الشراء أو تجنب السهم.")
+            return ("مستقر","تشير التوقعات إلى استقرار نسبي في السهم،")
         else:
             return ("تجنب", "تشير التوقعات إلى احتمال انخفاض السهم خلال الفترة القادمة.")
 
@@ -149,7 +152,7 @@ def get_stock_prediction(stock_name, user_id):
         growth_pct = clean_float(growth_pct)
 
         model_mae = MAE.get(stock_name, 0.0)
-        mae_percent = (model_mae / current_price) * 100 if current_price != 0 else 0.0
+        mae_percent = model_mae if current_price != 0 else 0.0
         mae_percent = clean_float(mae_percent)
 
         owns_stock = user_owns_stock(user_id, stock_name)
