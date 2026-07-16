@@ -50,7 +50,7 @@ const Chatbot = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background max-w-lg mx-auto w-full border-x border-gray-800">
+    <div className="h-[calc(100vh-80px)] flex flex-col bg-background w-full max-w-4xl mx-auto border-x border-gray-800">
       <header className="p-4 border-b border-gray-800 flex items-center space-x-3 space-x-reverse bg-surface/50 backdrop-blur-md">
         <div className="w-10 h-10 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/20">
           <Bot className="text-primary" />
