@@ -25,4 +25,8 @@ export const portfolioService = {
   addHolding: (data) => api.post('/portfolio/holdings', data),
 };
 
+export const chatService = {
+  sendMessage: (question) => api.post('/financial/chat', { question }),
+};
+
 export default api;
