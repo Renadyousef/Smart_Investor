@@ -22,6 +22,28 @@ const Home = () => {
     return names[ticker] || ticker;
   };
 
+  const getRecommendationStyles = (recommendation) => {
+    switch (recommendation) {
+      case 'مستقر':
+        return 'bg-gray-500/20 text-gray-400';
+      case 'مراقبة':
+        return 'bg-yellow-500/20 text-yellow-500';
+      case 'احتفاظ':
+      case 'شراء':
+      case 'BUY':
+      case 'KEEP':
+        return 'bg-success/20 text-success';
+      case 'بيع':
+      case 'تجنب':
+      case 'مخاطرة عالية':
+      case 'SELL':
+      case 'AVOID':
+        return 'bg-danger/20 text-danger';
+      default:
+        return 'bg-primary/20 text-primary';
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -108,24 +130,29 @@ const Home = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {marketData.map((stock) => (
-              <div key={stock.stock} className="bg-surface p-6 rounded-[2rem] space-y-4 border border-gray-800 hover:border-primary/50 transition-all group">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-2 space-x-reverse">
-                    <span className="font-bold text-gray-300">{stock.name}</span>
-                  </div>
-                  <TrendingUp size={18} className="text-success" />
-                </div>
-                <div className="flex justify-between items-end">
+              <div key={stock.stock} className="bg-surface p-6 rounded-[2rem] flex flex-col space-y-4 border border-gray-800 hover:border-primary/50 transition-all group">
+                <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-black text-2xl tracking-tighter">SAR {stock.current_price}</p>
-                    <p className="text-[10px] text-gray-500">مباشر من تداول</p>
+                    <div className="flex items-center space-x-2 space-x-reverse">
+                      <span className="font-bold text-gray-300 text-lg">{stock.name}</span>
+                    </div>
+                    <p className="text-[10px] text-gray-500">مباشر من تداول • {stock.stock}</p>
                   </div>
-                  <div className="w-24 h-12">
-                    <StockChart
-                      data={stock.history}
-                      color="#4CAF50"
-                    />
+                  <div className="text-right">
+                    <p className="font-black text-xl tracking-tighter">SAR {stock.current_price}</p>
+                    <div className="flex items-center justify-end text-success text-xs font-bold">
+                       <TrendingUp size={14} className="ml-1" />
+                       <span>+1.2%</span>
+                    </div>
                   </div>
+                </div>
+
+                <div className="w-full h-28 mt-2">
+                  <StockChart
+                    data={stock.history}
+                    color="#4CAF50"
+                    showTooltip={true}
+                  />
                 </div>
               </div>
             ))}
@@ -141,14 +168,10 @@ const Home = () => {
               <div className="text-left">
                 <p className="font-black text-xl tracking-tighter">SAR {stock.current_price}</p>
                 <div className="flex flex-col">
-                    <p className={`text-xs font-bold ${stock.growth_pct > 0 ? 'text-success' : 'text-danger'}`}>
+                    <p className={`text-sm font-bold ${stock.growth_pct > 0 ? 'text-success' : 'text-danger'}`}>
                     {stock.growth_pct > 0 ? '+' : ''}{stock.growth_pct}% متوقع
                     </p>
-                    <div className={`mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full inline-block w-max ${
-                        stock.recommendation === 'BUY' ? 'bg-success/20 text-success' :
-                        stock.recommendation === 'KEEP' ? 'bg-primary/20 text-primary' :
-                        'bg-danger/20 text-danger'
-                    }`}>
+                    <div className={`mt-1 text-xs font-bold px-3 py-1 rounded-full inline-block w-max ${getRecommendationStyles(stock.recommendation)}`}>
                         {stock.recommendation}
                     </div>
                 </div>
@@ -156,8 +179,8 @@ const Home = () => {
 
               <div className="flex items-center space-x-4 space-x-reverse">
                 <div className="text-right">
-                  <p className="font-bold group-hover:text-primary transition-colors">{stock.name}</p>
-                  <p className="text-[10px] text-gray-600 font-mono tracking-widest">{stock.stock}</p>
+                  <p className="text-lg font-bold group-hover:text-primary transition-colors">{stock.name}</p>
+                  <p className="text-xs text-gray-600 font-mono tracking-widest">{stock.stock}</p>
                 </div>
                 <div className="w-12 h-12 rounded-2xl bg-background border border-gray-800 flex items-center justify-center font-black text-primary text-xl shadow-inner">
                   {index + 1}

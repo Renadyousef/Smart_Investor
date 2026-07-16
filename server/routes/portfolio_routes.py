@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from database.session import get_db
 from middleware.auth import get_current_user
-from controllers.portfolio_controller import fetch_holdings, add_new_holding, get_portfolio_summary
+from controllers.portfolio_controller import fetch_holdings, add_new_holding, get_portfolio_summary, sell_holding
 from pydantic import BaseModel
 from typing import List
 import uuid
@@ -14,6 +14,9 @@ class HoldingCreate(BaseModel):
     ticker: str
     quantity: float
     average_purchase_price: float
+
+class SellRequest(BaseModel):
+    quantity: float
 
 class HoldingResponse(BaseModel):
     id: uuid.UUID
@@ -40,3 +43,11 @@ def get_summary(current_user: dict = Depends(get_current_user), db: Session = De
 @router.post("/holdings", response_model=HoldingResponse)
 def add_holding(request: HoldingCreate, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     return add_new_holding(request, current_user, db)
+
+@router.post("/holdings/{holding_id}/sell")
+def sell_holding_route(holding_id: uuid.UUID, request: SellRequest, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    try:
+        return sell_holding(holding_id, request.quantity, current_user, db)
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=str(e))

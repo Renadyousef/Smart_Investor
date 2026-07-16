@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, X, TrendingUp, TrendingDown } from 'lucide-react';
+import { Plus, X, TrendingUp, TrendingDown, Tag } from 'lucide-react';
 import StockChart from '../components/StockChart';
 import { portfolioService } from '../services/api';
 
@@ -7,6 +7,9 @@ const Portfolio = () => {
   const [holdings, setHoldings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showSellModal, setShowSellModal] = useState(false);
+  const [selectedHolding, setSelectedHolding] = useState(null);
+  const [sellQuantity, setSellQuantity] = useState('');
   const [newHolding, setNewHolding] = useState({
     stock_symbol: '',
     ticker: '',
@@ -44,6 +47,27 @@ const Portfolio = () => {
       fetchHoldings();
     } catch (err) {
       alert('فشل إضافة السهم');
+    }
+  };
+
+  const handleSellHolding = async (e) => {
+    e.preventDefault();
+    if (!selectedHolding || !sellQuantity) return;
+
+    const quantity = parseFloat(sellQuantity);
+    if (quantity <= 0 || quantity > selectedHolding.quantity) {
+      alert('كمية غير صالحة');
+      return;
+    }
+
+    try {
+      await portfolioService.sellHolding(selectedHolding.id, quantity);
+      setShowSellModal(false);
+      setSelectedHolding(null);
+      setSellQuantity('');
+      fetchHoldings();
+    } catch (err) {
+      alert(err.response?.data?.detail || 'فشل عملية البيع');
     }
   };
 
@@ -126,7 +150,20 @@ const Portfolio = () => {
                     <span className="mx-1">({item.pl_percentage}%)</span>
                     {item.profit_loss >= 0 ? <TrendingUp size={12} className="ml-1" /> : <TrendingDown size={12} className="ml-1" />}
                   </div>
-                  <p className="text-[9px] text-gray-600 font-medium">السعر الحالي: {item.current_price} SAR</p>
+                  <div className="flex items-center justify-end space-x-3 space-x-reverse mt-3">
+                    <p className="text-[10px] text-gray-600 font-medium">السعر الحالي: {item.current_price} SAR</p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedHolding(item);
+                        setShowSellModal(true);
+                      }}
+                      className="flex items-center space-x-1.5 space-x-reverse px-5 py-2.5 bg-gradient-to-br from-danger to-red-600 text-white rounded-xl text-xs font-black shadow-lg shadow-danger/30 hover:scale-105 active:scale-95 transition-all"
+                    >
+                      <Tag size={14} />
+                      <span>بيع</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -206,6 +243,69 @@ const Portfolio = () => {
                 className="w-full bg-primary py-5 rounded-2xl font-black text-lg text-white shadow-xl shadow-primary/30 hover:bg-opacity-90 active:scale-95 transition-all mt-4"
               >
                 تأكيد الإضافة
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Sell Holding Modal */}
+      {showSellModal && selectedHolding && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className="bg-surface w-full max-w-md p-10 rounded-[3rem] border border-gray-800 space-y-8 relative shadow-2xl scale-in-center">
+            <button
+              onClick={() => {
+                setShowSellModal(false);
+                setSelectedHolding(null);
+                setSellQuantity('');
+              }}
+              className="absolute top-8 left-8 text-gray-600 hover:text-white transition-colors"
+            >
+              <X size={28} />
+            </button>
+
+            <div className="text-center space-y-2">
+                <h2 className="text-3xl font-black text-white">بيع {selectedHolding.stock_symbol}</h2>
+                <p className="text-gray-500 text-sm">لديك {selectedHolding.quantity} سهم متوفرة</p>
+            </div>
+
+            <form onSubmit={handleSellHolding} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-500 mr-2 uppercase tracking-widest">الكمية المراد بيعها</label>
+                <div className="relative">
+                    <input
+                        type="number"
+                        step="any"
+                        placeholder="0.00"
+                        required
+                        className="w-full bg-background border border-gray-800 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-danger/50 transition-all placeholder:text-gray-700"
+                        value={sellQuantity}
+                        onChange={e => setSellQuantity(e.target.value)}
+                        max={selectedHolding.quantity}
+                        min="0.000001"
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setSellQuantity(selectedHolding.quantity.toString())}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-primary hover:text-primary-light"
+                    >
+                        بيع الكل
+                    </button>
+                </div>
+              </div>
+
+              <div className="bg-danger/5 border border-danger/10 p-4 rounded-2xl space-y-1">
+                <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">القيمة التقديرية</span>
+                    <span className="text-white font-bold">SAR {(parseFloat(sellQuantity || 0) * selectedHolding.current_price).toLocaleString()}</span>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-danger py-5 rounded-2xl font-black text-lg text-white shadow-xl shadow-danger/30 hover:bg-opacity-90 active:scale-95 transition-all mt-4"
+              >
+                تأكيد البيع
               </button>
             </form>
           </div>

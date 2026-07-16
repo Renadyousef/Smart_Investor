@@ -98,3 +98,29 @@ def add_new_holding(request, current_user, db: Session):
     db.commit()
     db.refresh(new_holding)
     return new_holding
+
+def sell_holding(holding_id: uuid.UUID, quantity: float, current_user, db: Session):
+    try:
+        user_id = uuid.UUID(current_user["id"]) if isinstance(current_user["id"], str) else current_user["id"]
+    except:
+        user_id = current_user["id"]
+
+    holding = db.query(PortfolioHolding).filter(
+        PortfolioHolding.id == holding_id,
+        PortfolioHolding.investor_id == user_id
+    ).first()
+
+    if not holding:
+        raise Exception("الاستثمار غير موجود")
+
+    if quantity > holding.quantity:
+        raise Exception("الكمية المطلوبة أكبر من الكمية المتوفرة")
+
+    if quantity == holding.quantity:
+        db.delete(holding)
+    else:
+        holding.quantity -= quantity
+        db.add(holding)
+    
+    db.commit()
+    return {"message": "تمت عملية البيع بنجاح"}

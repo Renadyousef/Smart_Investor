@@ -1,6 +1,6 @@
-import { ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, Tooltip, YAxis } from 'recharts';
 
-const StockChart = ({ data, color }) => {
+const StockChart = ({ data, color, showTooltip = false }) => {
   return (
     <div className="w-full h-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -11,11 +11,26 @@ const StockChart = ({ data, color }) => {
               <stop offset="95%" stopColor={color} stopOpacity={0}/>
             </linearGradient>
           </defs>
+          <YAxis hide domain={['auto', 'auto']} />
+          {showTooltip && (
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#111827',
+                border: '1px solid #374151',
+                borderRadius: '8px',
+                fontSize: '12px',
+                color: '#fff'
+              }}
+              itemStyle={{ color: color }}
+              labelStyle={{ display: 'none' }}
+              formatter={(value) => [`SAR ${value}`, 'السعر']}
+            />
+          )}
           <Area
             type="monotone"
             dataKey="price"
             stroke={color}
-            strokeWidth={1.5}
+            strokeWidth={2}
             fillOpacity={1}
             fill={`url(#gradient-${color.replace('#', '')})`}
             dot={false}
