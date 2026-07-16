@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { TrendingUp, TrendingDown, Search, MessageCircle, LogOut, Loader2 } from 'lucide-react';
 import StockChart from '../components/StockChart';
-import { stockService } from '../services/api';
+import { stockService, portfolioService } from '../services/api';
 
 const Home = () => {
   const { user, signOut } = useAuth();
   const [marketData, setMarketData] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
+  const [portfolioSummary, setPortfolioSummary] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const tickers = ['2222.SR', '2010.SR', '1120.SR'];
@@ -26,36 +27,29 @@ const Home = () => {
       try {
         setLoading(true);
 
-        // 1. Fetch real market history for the top cards (Market Overview)
-        const historyResults = await Promise.all(
-          tickers.map(async (ticker) => {
+        // Parallel requests for Market History, AI Predictions, and Portfolio Summary
+        const [historyResults, predictionResults, summaryRes] = await Promise.all([
+          Promise.all(tickers.map(async (ticker) => {
             try {
               const res = await stockService.getHistory(ticker);
               return { ...res.data, name: getStockName(ticker) };
-            } catch (err) {
-              console.error(`History error for ${ticker}:`, err);
-              return null;
-            }
-          })
-        );
-        setMarketData(historyResults.filter(r => r !== null));
-
-        // 2. Fetch AI predictions for the bottom list (AI Recommendation Section)
-        const predictionResults = await Promise.all(
-          tickers.map(async (ticker) => {
+            } catch (err) { return null; }
+          })),
+          Promise.all(tickers.map(async (ticker) => {
             try {
               const res = await stockService.getPrediction(ticker);
               return { ...res.data, name: getStockName(ticker) };
-            } catch (err) {
-              console.error(`Prediction error for ${ticker}:`, err);
-              return null;
-            }
-          })
-        );
+            } catch (err) { return null; }
+          })),
+          portfolioService.getSummary()
+        ]);
+
+        setMarketData(historyResults.filter(r => r !== null));
         setRecommendations(predictionResults.filter(r => r !== null));
+        setPortfolioSummary(summaryRes.data);
 
       } catch (error) {
-        console.error('Failed to fetch data:', error);
+        console.error('Failed to fetch dashboard data:', error);
       } finally {
         setLoading(false);
       }
@@ -89,10 +83,16 @@ const Home = () => {
         <div className="absolute inset-0 bg-primary/20 blur-3xl group-hover:bg-primary/30 transition-all"></div>
         <div className="relative bg-gradient-to-br from-primary via-primary/90 to-secondary p-8 rounded-[2.5rem] shadow-2xl text-center space-y-2 border border-white/10">
           <p className="text-white/60 text-sm font-medium">إجمالي المحفظة</p>
-          <h2 className="text-4xl font-black tracking-tight">SAR 30,000</h2>
-          <div className="inline-flex items-center space-x-2 space-x-reverse bg-white/10 px-4 py-1.5 rounded-full backdrop-blur-md">
-            <TrendingUp size={16} className="text-success" />
-            <span className="text-success font-bold text-sm">(8.50%) 2,500+</span>
+          <h2 className="text-4xl font-black tracking-tight text-white">
+            SAR {portfolioSummary?.total_market_value?.toLocaleString() || '0'}
+          </h2>
+          <div className={`inline-flex items-center space-x-2 space-x-reverse px-4 py-1.5 rounded-full backdrop-blur-md ${
+            (portfolioSummary?.total_profit_loss || 0) >= 0 ? 'text-success' : 'text-danger'
+          }`}>
+            {(portfolioSummary?.total_profit_loss || 0) >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+            <span className="font-bold text-sm">
+              ({portfolioSummary?.pl_percentage || '0.00'}%) {Math.abs(portfolioSummary?.total_profit_loss || 0).toLocaleString()}{portfolioSummary?.total_profit_loss >= 0 ? '+' : '-'}
+            </span>
           </div>
         </div>
       </div>
@@ -103,7 +103,7 @@ const Home = () => {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
              <Loader2 className="w-10 h-10 animate-spin text-primary" />
-             <p className="text-gray-500 text-sm">جاري جلب بيانات السوق...</p>
+             <p className="text-gray-500 text-sm italic">جاري جلب أداء السوق المباشر...</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

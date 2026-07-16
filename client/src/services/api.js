@@ -22,6 +22,7 @@ export const stockService = {
 
 export const portfolioService = {
   getHoldings: () => api.get('/portfolio/holdings'),
+  getSummary: () => api.get('/portfolio/summary'),
   addHolding: (data) => api.post('/portfolio/holdings', data),
 };
 

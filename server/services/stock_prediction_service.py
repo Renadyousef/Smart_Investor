@@ -175,21 +175,24 @@ def get_stock_prediction(stock_name, user_id):
 def save_recommendation(investor_id, stock_name, recommendation, growth_pct, reason):
     db = SessionLocal()
     try:
-        db.execute(
-            text("""
-                INSERT INTO recommendations
-                (investor_id, ticker, recommendation_type, predicted_growth, reason)
-                VALUES
-                (:investor_id, :ticker, :recommendation_type, :predicted_growth, :reason)
-            """),
-            {
-                "investor_id": investor_id,
-                "ticker": stock_name,
-                "recommendation_type": recommendation,
-                "predicted_growth": round(growth_pct, 2),
-                "reason": reason
-            }
+        from database.models import Recommendation
+        import uuid
+
+        # Convert investor_id to UUID object if it's a string
+        if isinstance(investor_id, str):
+            investor_id = uuid.UUID(investor_id)
+
+        new_rec = Recommendation(
+            investor_id=investor_id,
+            ticker=stock_name,
+            recommendation_type=recommendation,
+            predicted_growth=round(growth_pct, 2),
+            reason=reason
         )
+        db.add(new_rec)
         db.commit()
+    except Exception as e:
+        db.rollback()
+        raise e
     finally:
         db.close()

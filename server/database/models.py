@@ -43,3 +43,14 @@ class PortfolioHolding(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     owner = relationship("User", back_populates="portfolios")
+
+class Recommendation(Base):
+    __tablename__ = "recommendations"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    investor_id = Column(UUID(as_uuid=True), ForeignKey("investors.id"))
+    ticker = Column(String, nullable=False)
+    recommendation_type = Column(String)
+    predicted_growth = Column(Float)
+    reason = Column(String)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
