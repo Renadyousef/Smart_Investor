@@ -1,6 +1,6 @@
 # 📈 Smart Investor
 
-> AI-powered Saudi stock market assistant combining Machine Learning, RAG, and financial intelligence to support data-driven investment decisions.
+> AI-powered Saudi stock market assistant combining deep Learning, RAG, and financial intelligence to support data-driven investment decisions.
 
 ## 📌 Overview
 
