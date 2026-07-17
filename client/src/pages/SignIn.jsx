@@ -19,7 +19,7 @@ const SignIn = () => {
       await signIn(accountNumber, password);
       navigate('/');
     } catch (err) {
-      setError(err.message || 'فشل تسجيل الدخول');
+      setError(err);
     } finally {
       setLoading(false);
     }
@@ -76,15 +76,15 @@ const SignIn = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-xl text-lg font-medium text-white bg-primary hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className={`w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl text-xl font-black text-white bg-gradient-to-r from-primary to-secondary shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all duration-200 ${loading ? 'opacity-70 cursor-not-allowed shadow-none' : ''}`}
             >
-              {loading ? 'جاري التحميل...' : 'دخول'}
+              {loading ? 'جاري ...' : 'دخول'}
             </button>
           </div>
 
-          <div className="text-center mt-4">
-            <Link to="/signup" className="text-primary hover:text-opacity-80 font-medium">
-              ليس لديك حساب؟ سجل الآن
+          <div className="text-center mt-4"> ليس لديك حساب؟
+            <Link to="/signup" className="text-blue-400 underline hover:text-opacity-80 p-1">
+               سجل الآن
             </Link>
           </div>
         </form>

@@ -51,12 +51,12 @@ const Notifications = () => {
             }`}>
               {notif.icon}
             </div>
-            <div className="flex-1 space-y-1">
+            <div className="flex-1 space-y-2">
               <div className="flex justify-between items-center">
-                <h4 className="font-bold text-sm">{notif.title}</h4>
-                <span className="text-[10px] text-gray-500">{notif.time}</span>
+                <h4 className="font-black text-base text-white">{notif.title}</h4>
+                <span className="text-xs text-gray-500 font-bold">{notif.time}</span>
               </div>
-              <p className="text-xs text-gray-400 leading-relaxed">
+              <p className="text-sm text-gray-400 font-medium leading-relaxed">
                 {notif.body}
               </p>
             </div>

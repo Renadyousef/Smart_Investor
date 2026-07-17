@@ -25,12 +25,12 @@ const NavItem = ({ to, icon, label }) => (
     to={to}
     className={({ isActive }) =>
       `flex flex-col items-center space-y-1 transition-colors ${
-        isActive ? 'text-primary' : 'text-gray-500'
+        isActive ? 'text-blue-300' : 'text-gray-500'
       }`
     }
   >
     {React.cloneElement(icon, { size: 24 })}
-    <span className="text-[10px] font-medium">{label}</span>
+    <span className="text-[14px] font-medium">{label}</span>
   </NavLink>
 );
 

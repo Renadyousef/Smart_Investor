@@ -17,11 +17,11 @@ const SignUp = () => {
     setError('');
     setLoading(true);
     try {
-      await signUp(accountNumber, password, fullName);
-      alert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.');
+      const response = await signUp(accountNumber, password, fullName);
+      alert(response.message || 'تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.');
       navigate('/signin');
     } catch (err) {
-      setError(err.message || 'فشل إنشاء الحساب');
+      setError(err);
     } finally {
       setLoading(false);
     }
@@ -89,16 +89,17 @@ const SignUp = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-xl text-lg font-medium text-white bg-primary hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className={`w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl text-xl font-black text-white bg-gradient-to-r from-primary to-secondary shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all duration-200 ${loading ? 'opacity-70 cursor-not-allowed shadow-none' : ''}`}
             >
-              {loading ? 'جاري التسجيل...' : 'تسجيل'}
+              {loading ? 'جاري إنشاء الحساب...' : 'إنشاء الحساب'}
             </button>
           </div>
 
-          <div className="text-center mt-4">
-            <Link to="/signin" className="text-primary hover:text-opacity-80 font-medium">
-              لديك حساب بالفعل؟ سجل دخولك
+          <div className="text-center mt-4">  هل لديك حساب بالفعل؟
+            <Link to="/signin" className="text-blue-400 underline hover:text-opacity-80 p-1">
+               سجل دخولك 
             </Link>
+            
           </div>
         </form>
       </div>

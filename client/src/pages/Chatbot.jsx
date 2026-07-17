@@ -56,10 +56,10 @@ const Chatbot = () => {
           <Bot className="text-primary" />
         </div>
         <div>
-          <h1 className="font-bold text-lg">المساعد الذكي</h1>
-          <div className="flex items-center space-x-1 space-x-reverse">
-            <span className="w-2 h-2 bg-success rounded-full animate-pulse"></span>
-            <span className="text-[10px] text-gray-500 font-medium">متصل بنماذج NVIDIA AI</span>
+          <h1 className="font-black text-xl text-white tracking-tight">المساعد الذكي</h1>
+          <div className="flex items-center space-x-1.5 space-x-reverse">
+            <span className="w-2.5 h-2.5 bg-success rounded-full animate-pulse shadow-lg shadow-success/50"></span>
+            <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">تحليل NVIDIA AI مباشر</span>
           </div>
         </div>
       </header>
