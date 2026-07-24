@@ -1,4 +1,5 @@
 # 📈 Smart Investor
+- Developed as part of a project exhibition that contributed to a Guinness World Record achievement.
 
 > AI-powered Saudi stock market assistant combining deep Learning, RAG, and financial intelligence to support data-driven investment decisions.
 
